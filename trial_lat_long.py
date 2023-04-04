@@ -2,6 +2,7 @@ import pandas as pd
 import geopandas as gpd
 import pyproj
 import re
+from shapely import Point
 
 class OsGridRef:
     def __init__(self, easting, northing):
@@ -55,16 +56,21 @@ class OsGridRef:
         return OsGridRef(e, n)
 
 
+# script to read the csv file and to select the 'DISCHARGE_NGR' column where OS grid refs are stored
+df = pd.read_csv('consents_active_filtered.csv')
 
-gridrefs = ["TQ8400091000", "SP9081071430", "SP6454059690", "TL0278095370"]
-for gridref in gridrefs:
+# update the 'DISCHARGE_NGR' column with the new values
+for i, gridref in enumerate(df['DISCHARGE_NGR']):
     os_grid_ref = OsGridRef.parse(gridref)
     transformer = pyproj.Transformer.from_crs("EPSG:27700", "EPSG:4326", always_xy=True)
     lon, lat, _ = transformer.transform(os_grid_ref.easting, os_grid_ref.northing, 0)
-    print(f"Grid Reference: {gridref} => Latitude: {lat:.6f}, Longitude: {lon:.6f}")
+    df.loc[i, 'DISCHARGE_NGR'] = f"{lon:.6f}, {lat:.6f}"
 
-    # read the csv file containing sewer outlet locaitons
-df = pd.read_csv("consents_active_filtered.csv")
+# save the updated dataframe to a new CSV file
+df.to_csv('os_grid_ref.csv', index=False)
+
+
+# save function to shp. file
 
 # parse the os grid reference column
 #df["0s_grid_ref"] = df["DISCHARGE_NGR"].apply(OsGridRef.parse)
