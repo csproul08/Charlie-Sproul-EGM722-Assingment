@@ -1,9 +1,7 @@
 import pandas as pd
-import geopandas as gpd
 import pyproj
 import re
-from shapely import Point
-
+from tqdm import tqdm
 class OsGridRef:
     def __init__(self, easting, northing):
         self.easting = int(easting)
@@ -60,7 +58,7 @@ class OsGridRef:
 df = pd.read_csv('consents_active_filtered.csv')
 
 # update the 'DISCHARGE_NGR' column with the new values
-for i, gridref in enumerate(df['DISCHARGE_NGR']):
+for i, gridref in tqdm(enumerate(df['DISCHARGE_NGR']), total=len(df)):
     os_grid_ref = OsGridRef.parse(gridref)
     transformer = pyproj.Transformer.from_crs("EPSG:27700", "EPSG:4326", always_xy=True)
     lon, lat, _ = transformer.transform(os_grid_ref.easting, os_grid_ref.northing, 0)
@@ -68,17 +66,3 @@ for i, gridref in enumerate(df['DISCHARGE_NGR']):
 
 # save the updated dataframe to a new CSV file
 df.to_csv('os_grid_ref.csv', index=False)
-
-
-# save function to shp. file
-
-# parse the os grid reference column
-#df["0s_grid_ref"] = df["DISCHARGE_NGR"].apply(OsGridRef.parse)
-
-# define the coordinate reference systems
-#in_crs = pyproj.CRS("EPSG:27700")
-#out_crs = pyproj.CRS("EPSG:4236")
-
-# convert the os grid reference to lat and long
-#df["lon"], df["lat"], _ = zip(*[out_crs.transform_point(easting, northing, in_crs) for easting, northing in df["Os_grid_ref"].apply(lambda x: (x.e, x.n))])
-
