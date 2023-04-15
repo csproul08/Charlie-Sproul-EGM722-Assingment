@@ -38,12 +38,27 @@ sewers_spilltime = sewers_spilltime.drop(columns=['EFFLUENT_GRID_REF', 'DISCHARG
 'WFD Waterbody ID (Cycle 2)\n(discharge outlet)', 'WFD Waterbody Catchment Name (Cycle 2)\n(discharge outlet)',
 'Receiving Water / Environment (common name)\n(EA Consents Database)',
 'Shellfish Water (only populate for storm overflow with a Shellfish Water EDM requirement)',
-'Treatment Method\n(over & above Storm Tank settlement / screening)', 'Initial EDM Commission Date',])
+'Treatment Method\n(over & above Storm Tank settlement / screening)', 'Initial EDM Commission Date',
+'EDM Operation -\n% of reporting period EDM operational', 'EDM Operation -\nReporting % -\nPrimary Reason <90%',
+'EDM Operation -\nAction taken / planned -\nStatus & timeframe',
+'High Spill Frequency -\nOperational Review -\nPrimary Reason',
+'High Spill Frequency -\nAction taken / planned -\nStatus & timeframe',
+'High Spill Frequency -\nEnvironmental Enhancement -\nPlanning Position (Hydraulic capacity)'])
 
-print(sewers_spilltime.columns)
+# Split lat long data stored in 'DISCHARGE_NGR' column into two seperate columns, to allow conversion to shapefile for use with Folium
+sewers_spilltime = sewers_spilltime.assign(long=sewers_spilltime['DISCHARGE_NGR'].str.split(',').str[0],
+                                           lat=sewers_spilltime['DISCHARGE_NGR'].str.split(',').str[1])
 
-# Save joined file into new csv ready to be loaded for folium interactive map
+# Delete the 'DISCHARGE_NGR' column
+sewers_spilltime.drop('DISCHARGE_NGR', axis=1, inplace=True)
 
+# save the merged and cleaned DataFrame to a new csv file for use with folium
+sewers_spilltime.to_csv('sewers_spill_merged.csv', index=False)
+
+# Read the new dataframe
+spm = pd.read_csv('sewers_spill_merged.csv')
+
+print(spm.columns)
 
 
 # Create a map centered at specific coordinates
