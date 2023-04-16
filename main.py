@@ -1,4 +1,6 @@
 import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Point
 import folium
 
 # Load OS Grid Ref CSV and Storm Overflow Annual Return .xlsx file
@@ -46,39 +48,50 @@ sewers_spilltime = sewers_spilltime.drop(columns=['EFFLUENT_GRID_REF', 'DISCHARG
 'High Spill Frequency -\nEnvironmental Enhancement -\nPlanning Position (Hydraulic capacity)'])
 
 # Split lat long data stored in 'DISCHARGE_NGR' column into two seperate columns, to allow conversion to shapefile for use with Folium
-sewers_spilltime = sewers_spilltime.assign(long=sewers_spilltime['DISCHARGE_NGR'].str.split(',').str[0],
+sewers_spilltime = sewers_spilltime.assign(lon=sewers_spilltime['DISCHARGE_NGR'].str.split(',').str[0],
                                            lat=sewers_spilltime['DISCHARGE_NGR'].str.split(',').str[1])
 
-# Delete the 'DISCHARGE_NGR' column
+sewers_spilltime ['geometry'] = list(zip(sewers_spilltime['lon'], sewers_spilltime['lat']))
+sewers_spilltime['geometry'] = sewers_spilltime['geometry'].apply(Point)
+
+# Delete the 'DISCHARGE_NGR' colum
 sewers_spilltime.drop('DISCHARGE_NGR', axis=1, inplace=True)
 
 # save the merged and cleaned DataFrame to a new csv file for use with folium
 sewers_spilltime.to_csv('sewers_spill_merged.csv', index=False)
 
-# Read the new dataframe
+# Read the new dataframe and convert lat lon into a single coumn called geometry and apply as a point (instead of tuple)
 spm = pd.read_csv('sewers_spill_merged.csv')
+spm['geometry'] = list(zip(sewers_spilltime['lon'], sewers_spilltime['lat']))
+spm['geometry'] = spm['geometry'].apply(Point)
 
-print(spm.columns)
+# Create a new GeoDataFrame from the dataframe spm
+gdf = gpd.GeoDataFrame(spm)
+gdf.set_crs("EPSG:4326", inplace=True)
+
+print(gdf)
+gdf.to_file('spm_points.shp')
+
 
 
 # Create a map centered at specific coordinates
-m = folium.Map(location=[center_lat, center_lon], zoom_start=5)
+#m = folium.Map(location=[center_lat, center_lon], zoom_start=5)
 
 # Add markers for each location in the DataFrame
-for row in sewers.itertuples():
-    folium.Marker(
-        location=[row.lat, row.lon],
-        tooltip=row.location
-    ).add_to(m)
+#for row in sewers.itertuples():
+#    folium.Marker(
+#        location=[row.lat, row.lon],
+ #       tooltip=row.location
+ #   ).add_to(m)
 
 # Display the map
-m
+#m
 
 # Load csv as dataframe and define crs
-df = pd.read_csv('os_grid_ref.csv')
-crs = {'init':'epsg:4326'}
+#df = pd.read_csv('os_grid_ref.csv')
+#crs = {'init':'epsg:4326'}
 
-plt.ion() # make the plotting interactive
+#plt.ion() # make the plotting interactive
 
 
 
