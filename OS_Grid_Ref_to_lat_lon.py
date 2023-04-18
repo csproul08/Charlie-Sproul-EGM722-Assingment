@@ -11,30 +11,30 @@ class OsGridRef:
     def parse(gridref):
         gridref = str(gridref).strip()
 
-        # check for fully numeric comma-separated gridref format
+        # Check that the grid reference is in a fully numeric comma separated format
         match = re.match(r"^(\d+),\s*(\d+)$", gridref)
         if match:
             return OsGridRef(match.group(1), match.group(2))
 
-        # validate format
+        # Validate the grid ref format, looking for a starting letter (HNST) and a second letter (not including I)
         match = re.match(r"^[HNST][ABCDEFGHJKLMNOPQRSTUVWXYZ]\s*\d+\s*\d+$", gridref, re.IGNORECASE)
         if not match:
             raise ValueError(f"Invalid grid reference: {gridref}")
 
-        # get numeric values of letter references, mapping A->0, B->1, C->2, etc:
+        # For each letter, get a numeric value starting at A = 0
         l1 = ord(gridref.upper()[0]) - ord("A")  # 500km square
         l2 = ord(gridref.upper()[1]) - ord("A")  # 100km square
-        # shuffle down letters after "I" since "I" is not used in grid:
+        # As I is not used in OS Grid References (too similar to 1), reduce the numeric value of each letter past 7 by 1
         if l1 > 7:
             l1 -= 1
         if l2 > 7:
             l2 -= 1
 
-        # convert grid letters into 100km-square indexes from false origin (grid square SV):
+        # Convert the two letter grid reference into 100km-square indexes from a false origin (grid square SV):
         e100km = ((l1 - 2) % 5) * 5 + (l2 % 5)
         n100km = (19 - (l1 // 5) * 5) - (l2 // 5)
 
-        # skip grid letters to get numeric (easting/northing) part of ref
+        # skip grid letters to get the numeric (easting/northing) part of the reference
         en = gridref[2:].strip().split()
         # if e/n not whitespace separated, split half way
         if len(en) == 1:
@@ -57,7 +57,7 @@ class OsGridRef:
 # script to read the csv file and to select the 'DISCHARGE_NGR' column where OS grid refs are stored
 df = pd.read_csv('consents_active_filtered.csv')
 
-# update the 'DISCHARGE_NGR' column with the new values
+# update the 'DISCHARGE_NGR' column with the new values and display % complete and estimated time remaining
 for i, gridref in tqdm(enumerate(df['DISCHARGE_NGR']), total=len(df)):
     os_grid_ref = OsGridRef.parse(gridref)
     transformer = pyproj.Transformer.from_crs("EPSG:27700", "EPSG:4326", always_xy=True)
