@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
@@ -6,10 +7,7 @@ import folium
 # Load OS Grid Ref CSV and Storm Overflow Annual Return .xlsx file
 sewers = pd.read_csv('os_grid_ref.csv')
 excel_file = 'EDM 2022 Storm Overflow Annual Return - all water and sewerage companies.xlsx'
-spilltime = pd.read_excel(excel_file, sheet_name=None)
-
-# Combine data from .xlsx worksheets as single DataFrame
-spilltime_all = pd.concat(spilltime.values(), ignore_index=True)
+spilltime_all = pd.concat(pd.read_excel(excel_file, sheet_name=None).values(), ignore_index=True)
 
 # Change name of spilltime .xls column 'EA Permit Reference (EA Consents Database) to 'PERMIT_NUMBER'
 spilltime_all.columns = spilltime_all.columns.str.replace("EA Permit Reference (EA Consents Database)", "PERMIT_NUMBER")
@@ -80,12 +78,18 @@ print(gdf)
 gdf.to_file('spm_points.shp')
 
 # Script to create map in folium and basemap, legend, etc...
-my_map = folium.Map(location=[51.664386, 0.52167739], tiles="Stamen Terrain", zoom_start=14, control_scale=True)
-my_map.save('Hanningfield.html')
+my_map = folium.Map(location=[51.664386, 0.52167739], tiles="OpenStreetMap", prefer_canvas=True,
+                    zoom_start=14, control_scale=True)
 
 # Script to load spm_points (assign colour and point object), OS river network and OS green spaces
+rivers = gpd.read_file(os.path.abspath('Data/WatercourseLink.shp'))
+#greenspace = gpd.read_file(os.path.abspath('Data/GB_GreenspaceSite.shp'))
 
+# Add shapefiles to map
+folium.GeoJson(rivers).add_to(my_map)
+#folium.GeoJson(greenspace).add_to(my_map)
 
+my_map.save('HanningfieldV2.html')
 # Script to load a few key details of each sewer outfall location, e.g site name, water company name, address/grid ref
 # , water body name, total spill time in hrs, etc...
 
