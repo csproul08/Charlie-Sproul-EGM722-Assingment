@@ -2,6 +2,9 @@ import pandas as pd
 import pyproj
 import re
 from tqdm import tqdm
+
+###---1.0---###
+#
 class OsGridRef:
     def __init__(self, easting, northing):
         self.easting = int(easting)
