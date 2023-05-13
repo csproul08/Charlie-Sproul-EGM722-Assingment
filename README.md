@@ -3,30 +3,16 @@
 --- 
 
 ### Introduction
-The script within this repository aims to use data made available by the Environment Agency to first convert the 
-location of sewer outfall locations in England from OS Grid References to latitude and longitude co-ordinates. Secondly,
-these locations are manipulated and plotted on an interactive map, which categorises sewer locations based on the amount 
-of time that they discharged raw untreated sewage into the river network.  
-
-Ordnance Survey Grid Reference to lat/lon script uses data made available by the Environment Agency, however this 
-does require pre-filtering in Microsoft Access Database and exporting as a csv file prior to use within the script. 
-
----
-#### Script One: OS Grid Ref to Lat Lon
-
-This script converts OS Grid Reference co-ordinates into latitude and longitude co-ordinates, enabling spatial analysis 
-and display using GIS
-software. The second script manipulates and merges datasets for the location of inland sewer outfall
-pipes and data for the activity of these pipes. It displays this data in an interactive map 
-
----
-
-#### Script Two: Sewage Interactive Map
-
-This script uses opensource data made available by the Environment Agency for the location of sewer outlet pipes with 
-current permits to discharge untreated raw sewage into the river network. 
-It showcases the location of outlet pipes, categorises them based on how long they have discharged raw sewage in the 
-last year for, and displays the users location or a user inputted location.  
+There are two scripts within this repository, the first undertakes a geodetic conversion of Ordnance Survey grid
+reference positions for sewer outfall locations in England that are permitted under licence to discharge raw
+untreated sewage in the river network at times of high flow rate. It converts the co-ordinates into longitude and 
+laitude. The second script manipulates multiple data files 
+and merges these, creating a shapefile of the sewer outfall locations in England. It also plots an interactive map
+that displays and categorises the outfall locations based on the spill time of raw sewage into the River Network. 
+Additionally, it plots the locations of bathing waters as published by the Environment Agency and creates a search bar
+to enable the user to search for locations and to obtain information regarding the state of rivers nearby the user
+inputted location. 
+ 
 - - -
 
 ### Installation/Set up Instructions
@@ -38,15 +24,27 @@ environment for these scripts.
 All code, data files and dependencies can be found within the repository 'Charlie-Sproul' EGM722 Assignment, accessible
 here: https://github.com/csproul08/Charlie-Sproul-EGM722-Assingment
 
+--- 
+### Requirements
+Anaconda Navigator and PyCharm are both required and recommended for running both of these scripts. 
 
-______________
-= 
-#using the = below the underscore creates a thick line as long as you want it
-### Setup
+To install [PyCharm Community Edition](www.jetbrains.com/edu-products/download/other-PCE.html)
 
-- Git prerequisites 
-- Github Desktop
-- Environment
-- Dependencies 
-- Data files: Raw data, rivers data, green spaces data
-- - - 
+To install [Anaconda Navigator](docs.anaconda.com/free/navigator/index.html)
+
+---
+### Dependencies 
+The following list sets out the dependencies required to run these scripts: 
+- Python
+- geopandas
+- cartopy>=0.21
+- notebook
+- rasterio
+- pyepsg
+- folium
+- pyproj
+- tqdm
+- pandas
+- geopy
+- pyogrio
+- openpyxl
